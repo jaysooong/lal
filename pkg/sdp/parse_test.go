@@ -10,9 +10,10 @@ package sdp
 
 import (
 	"encoding/hex"
-	"github.com/q191201771/lal/pkg/avc"
 	"strings"
 	"testing"
+
+	"github.com/q191201771/lal/pkg/avc"
 
 	"github.com/q191201771/lal/pkg/base"
 
@@ -702,4 +703,18 @@ a=control:streamid=1
 	assert.Equal(t, nil, err)
 	assert.Equal(t, true, ctx.IsAudioPayloadTypeOrigin(8))
 	assert.Equal(t, true, ctx.IsAudioUnpackable())
+}
+
+//fmtp:96 profile-level-id=8;config=Z0KAH4iLQCgC3QgAADhAAAr8gCA=,aM44gA==
+func TestParseSpsPpsHik(t *testing.T) {
+	// s := "a=fmtp:96 packetization-mode=1; sprop-parameter-sets=Z2QAIKzZQMApsBEAAAMAAQAAAwAyDxgxlg==,aOvssiw=; profile-level-id=640020"
+	// s := "a=fmtp:96 packetization-mode=1; sprop-parameter-sets=Z0KAH4iLQCgC3QgAADhAAAr8gCA=,aM44gA==; profile-level-id=640020;"
+	// s := "a=fmtp:96 packetization-mode=1; sprop-parameter-sets=Z0KAH4iLQCgC3QgAADhAAAr8gCA=,aM44gA== profile-level-id=640020"
+	s := "a=fmtp:96 profile-level-id=8;sprop-parameter-sets=Z0KAH4iLQCgC3QgAADhAAAr8gCA=,aM44gA=="
+	f, err := ParseAFmtPBase(s)
+	assert.Equal(t, nil, err)
+	sps, pps, err := ParseSpsPps(&f)
+	assert.Equal(t, nil, err)
+	assert.Equal(t, goldenSps, sps)
+	assert.Equal(t, goldenPps, pps)
 }

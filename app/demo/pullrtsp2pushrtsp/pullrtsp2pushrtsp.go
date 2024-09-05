@@ -180,10 +180,16 @@ func main() {
 }
 
 func parseFlag() (inUrl string, outUrl string, pullOverTcp int, pushOverTcp int) {
-	i := flag.String("i", "", "specify pull rtsp url")
-	o := flag.String("o", "", "specify push rtsp url")
-	t := flag.Int("t", 0, "specify pull interleaved mode(rtp/rtcp over tcp)")
-	y := flag.Int("y", 0, "specify push interleaved mode(rtp/rtcp over tcp)")
+	// i := flag.String("i", "rtsp://admin:ailab2020@192.168.1.101:554/cam/realmonitor?channel=1&subtype=0", "specify pull rtsp url")
+	// i := flag.String("i", "rtsp://admin:ailab2020@192.168.1.114:554/h264/ch1/main/av_stream", "specify pull rtsp url")
+	i := flag.String("i", "rtsp://10.135.163.194:48082/live/1795987239212371968$1$0", "specify pull rtsp url")
+
+	// o := flag.String("o", "rtsp://192.168.1.179:5544/live/test101", "specify push rtsp url")
+	// o := flag.String("o", "rtsp://192.168.1.15:5544/live/test114", "specify push rtsp url")
+	o := flag.String("o", "rtsp://127.0.0.1:8544/testpd1", "specify push rtsp url")
+
+	t := flag.Int("t", 1, "specify pull interleaved mode(rtp/rtcp over tcp)")
+	y := flag.Int("y", 1, "specify push interleaved mode(rtp/rtcp over tcp)")
 	flag.Parse()
 	if *i == "" || *o == "" {
 		flag.Usage()
@@ -195,3 +201,20 @@ func parseFlag() (inUrl string, outUrl string, pullOverTcp int, pushOverTcp int)
 	}
 	return *i, *o, *t, *y
 }
+
+// func parseFlag() (inUrl string, outUrl string, pullOverTcp int, pushOverTcp int) {
+// 	i := flag.String("i", "", "specify pull rtsp url")
+// 	o := flag.String("o", "", "specify push rtsp url")
+// 	t := flag.Int("t", 0, "specify pull interleaved mode(rtp/rtcp over tcp)")
+// 	y := flag.Int("y", 0, "specify push interleaved mode(rtp/rtcp over tcp)")
+// 	flag.Parse()
+// 	if *i == "" || *o == "" {
+// 		flag.Usage()
+// 		_, _ = fmt.Fprintf(os.Stderr, `Example:
+//   %s -i rtsp://localhost:5544/live/test110 -o rtsp://localhost:5544/live/test220
+//   %s -i rtsp://localhost:5544/live/test110 -o rtsp://localhost:5544/live/test220 -t 1 -y 1
+// `, os.Args[0], os.Args[0])
+// 		base.OsExitAndWaitPressIfWindows(1)
+// 	}
+// 	return *i, *o, *t, *y
+// }

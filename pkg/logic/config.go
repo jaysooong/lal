@@ -48,6 +48,7 @@ type Config struct {
 	PprofConfig      PprofConfig      `json:"pprof"`
 	LogConfig        nazalog.Option   `json:"log"`
 	DebugConfig      DebugConfig      `json:"debug"`
+	KafkaConfig      KafkaConfig      `json:"kafka"`
 }
 
 type RtmpConfig struct {
@@ -165,6 +166,13 @@ type DebugConfig struct {
 	LogGroupIntervalSec       int `json:"log_group_interval_sec"`
 	LogGroupMaxGroupNum       int `json:"log_group_max_group_num"`
 	LogGroupMaxSubNumPerGroup int `json:"log_group_max_sub_num_per_group"`
+}
+
+type KafkaConfig struct {
+	Enable     bool   `json:"enable"`
+	ServerInfo string `json:"server_info"`
+	TimeOutS   int16  `json:"time_out_s"`
+	TopicTS    string `json:"topic_ts"`
 }
 
 type CommonHttpServerConfig struct {

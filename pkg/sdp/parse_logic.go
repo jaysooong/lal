@@ -52,7 +52,10 @@ func (lc *LogicContext) IsPayloadTypeOrigin(t int) bool {
 }
 
 func (lc *LogicContext) IsAudioUnpackable() bool {
-	return (lc.audioPayloadTypeBase == base.AvPacketPtAac && lc.Asc != nil) || (lc.audioPayloadTypeBase == base.AvPacketPtG711A) || (lc.audioPayloadTypeBase == base.AvPacketPtG711U) || (lc.audioPayloadTypeBase == base.AvPacketPtOpus)
+	//jay 20240202修改音频数据不全，导致的报错问题
+	// Log.Errorf("########## IsAudioUnpackable LogicContext audioPayloadTypeBase=%v audioAControl=%v, AudioClockRate=%v", lc.audioPayloadTypeBase, lc.audioAControl, lc.AudioClockRate)
+	return lc.hasAudio && ((lc.audioPayloadTypeBase == base.AvPacketPtAac && lc.Asc != nil) || (lc.audioPayloadTypeBase == base.AvPacketPtG711A) || (lc.audioPayloadTypeBase == base.AvPacketPtG711U) || (lc.audioPayloadTypeBase == base.AvPacketPtOpus))
+	//return (lc.audioPayloadTypeBase == base.AvPacketPtAac && lc.Asc != nil) || (lc.audioPayloadTypeBase == base.AvPacketPtG711A) || (lc.audioPayloadTypeBase == base.AvPacketPtG711U) || (lc.audioPayloadTypeBase == base.AvPacketPtOpus)
 }
 
 func (lc *LogicContext) IsVideoUnpackable() bool {
@@ -103,6 +106,9 @@ func ParseSdp2LogicContext(b []byte) (LogicContext, error) {
 	var ret LogicContext
 
 	c, err := ParseSdp2RawContext(b)
+
+	// Log.Errorf("############# ParseSdp2RawContext c.len=%v c.list=%v", len(c.MediaDescList), c.MediaDescList)
+
 	if err != nil {
 		return ret, err
 	}

@@ -258,6 +258,9 @@ func (session *BaseInSession) onAvPacketUnpacked(pkt base.AvPacket) {
 	} else {
 		session.observer.OnAvPacket(pkt)
 	}
+
+	// jay
+	// session.observer.OnAvPacket(pkt)
 }
 
 // callback by avpacket queue

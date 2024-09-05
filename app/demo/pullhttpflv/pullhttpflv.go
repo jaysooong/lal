@@ -76,8 +76,9 @@ func main() {
 }
 
 func parseFlag() (url, flvfile string) {
-	i := flag.String("i", "", "specify http-flv url")
-	o := flag.String("o", "", "specify output flv file")
+	i := flag.String("i", "http://192.168.1.15:18080/live/114.flv", "specify http-flv url")
+	o := flag.String("o", "F:\\lal\\test114.flv", "specify output flv file")
+
 	flag.Parse()
 	if *i == "" || *o == "" {
 		flag.Usage()

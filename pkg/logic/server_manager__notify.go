@@ -9,7 +9,10 @@
 package logic
 
 import (
+	"encoding/json"
+
 	"github.com/q191201771/lal/pkg/base"
+	"github.com/q191201771/naza/pkg/nazalog"
 	"github.com/q191201771/naza/pkg/taskpool"
 )
 
@@ -99,6 +102,27 @@ func (sm *ServerManager) nhOnRtmpConnect(info base.RtmpConnectInfo) {
 }
 
 func (sm *ServerManager) nhOnHlsMakeTs(info base.HlsMakeTsInfo) {
+
+	if sm.kafkaProducer != nil {
+
+		if info.Event == "close" {
+
+			info.ServerId = sm.config.ServerId
+
+			sm.notifyHandlerThread.Go(func(param ...interface{}) {
+				p := param[0].(base.HlsMakeTsInfo)
+
+				v, err := json.Marshal(p)
+				if err != nil {
+					nazalog.Errorf("HlsMakeTsInfo 2 json error,err: %v", err)
+					return
+				}
+				sm.kafkaProducer.SendMessageTsNotify(p.StreamName, v)
+
+			}, info)
+		}
+	}
+
 	sm.notifyHandlerThread.Go(func(param ...interface{}) {
 		p := param[0].(base.HlsMakeTsInfo)
 		sm.option.NotifyHandler.OnHlsMakeTs(p)

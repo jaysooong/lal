@@ -9,9 +9,11 @@
 package logic
 
 import (
+	"math"
+	"time"
+
 	"github.com/q191201771/lal/pkg/base"
 	"github.com/q191201771/naza/pkg/bininfo"
-	"math"
 )
 
 // server_manager__api.go
@@ -71,6 +73,11 @@ func (sm *ServerManager) CtrlStartRelayPull(info base.ApiCtrlStartRelayPullReq) 
 
 	// 注意，如果group不存在，我们依然relay pull
 	g := sm.getOrCreateGroup("", streamName)
+
+	//jay 这块新增，主要用于 当收到拉流请求时，再次刷新拉流的开始时间，延长空闲流的过期时间
+	if g.pullProxy != nil {
+		g.pullProxy.lastHasOutTs = time.Now().UnixNano() / 1e6
+	}
 
 	sessionId, err := g.StartPull(info)
 	if err != nil {

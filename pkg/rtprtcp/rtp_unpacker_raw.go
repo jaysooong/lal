@@ -34,6 +34,8 @@ func (unpacker *RtpUnpackerRaw) TryUnpackOne(list *RtpPacketList) (unpackedFlag 
 		return false, 0
 	}
 
+	// Log.Errorf("########## unpacker.clockRate = %v", unpacker.clockRate)
+
 	// 暂时认为一个rtp为一帧数据(G711A/G711U)
 	b := p.Packet.Body()
 	var outPkt base.AvPacket

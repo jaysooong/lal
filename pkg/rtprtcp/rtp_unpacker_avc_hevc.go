@@ -258,6 +258,14 @@ func calcPositionIfNeededAvc(pkt *RtpPacket) {
 		// |S|E|R|  Type   |
 		// +---------------+
 
+		//jay 根据实际流增加的判断
+		if len(b) < 1 {
+			Log.Errorf("Fu header error. unknown nalu type. outerNaluType=%d(%d), header=%+v, len=%d, raw=%s",
+				b[0], outerNaluType, pkt.Header, len(pkt.Raw), hex.Dump(nazabytes.Prefix(pkt.Raw, 128)))
+
+			return
+		}
+
 		fuIndicator := b[0]
 		_ = fuIndicator
 		fuHeader := b[1]

@@ -15,6 +15,7 @@ import (
 	_ "net/http/pprof"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 	"time"
 
@@ -46,6 +47,7 @@ type ServerManager struct {
 	httpApiServer *HttpApiServer
 	pprofServer   *http.Server
 	wsrtspServer  *rtsp.WebsocketServer
+	kafkaProducer *KafkaProducer
 	exitChan      chan struct{}
 
 	mutex        sync.Mutex
@@ -133,6 +135,12 @@ Doc: %s
 
 	if sm.config.PprofConfig.Enable {
 		sm.pprofServer = &http.Server{Addr: sm.config.PprofConfig.Addr, Handler: nil}
+	}
+
+	if sm.config.KafkaConfig.Enable {
+		serverInfo := sm.config.KafkaConfig.ServerInfo
+		arrs := strings.Split(serverInfo, ",")
+		sm.kafkaProducer = NewKafkaProducer(arrs, sm.config.KafkaConfig.TimeOutS, sm.config.KafkaConfig.TopicTS)
 	}
 
 	if sm.option.Authentication == nil {
@@ -276,6 +284,12 @@ func (sm *ServerManager) RunLoop() error {
 		}()
 	}
 
+	if sm.kafkaProducer != nil {
+		if err := sm.kafkaProducer.Init(); err != nil {
+			return err
+		}
+	}
+
 	uis := uint32(sm.config.HttpNotifyConfig.UpdateIntervalSec)
 	var updateInfo base.UpdateInfo
 	updateInfo.Groups = sm.StatAllGroup()
@@ -360,6 +374,10 @@ func (sm *ServerManager) Dispose() {
 
 	if sm.pprofServer != nil {
 		sm.pprofServer.Close()
+	}
+
+	if sm.kafkaProducer != nil {
+		sm.kafkaProducer.Close()
 	}
 
 	//if sm.hlsServer != nil {

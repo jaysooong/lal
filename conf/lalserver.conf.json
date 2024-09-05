@@ -3,8 +3,8 @@
   "conf_version": "v0.4.1",
   "rtmp": {
     "enable": true,
-    "addr": ":1935",
-    "rtmps_enable": true,
+    "addr": ":11935",
+    "rtmps_enable": false,
     "rtmps_addr": ":4935",
     "rtmps_cert_file": "./conf/cert.pem",
     "rtmps_key_file": "./conf/key.pem",
@@ -26,25 +26,25 @@
     "enable": true,
     "enable_https": true,
     "url_pattern": "/",
-    "gop_num": 0,
+    "gop_num": 1,
     "single_gop_max_frame_num": 0
   },
   "hls": {
     "enable": true,
-    "enable_https": true,
+    "enable_https": false,
     "url_pattern": "/hls/",
     "out_path": "./lal_record/hls/",
-    "fragment_duration_ms": 3000,
+    "fragment_duration_ms": 6000,
     "fragment_num": 6,
     "delete_threshold": 6,
-    "cleanup_mode": 1,
+    "cleanup_mode": 0,
     "use_memory_as_disk_flag": false,
     "sub_session_timeout_ms": 30000,
-    "sub_session_hash_key": ""
+    "sub_session_hash_key": "1"
   },
   "httpts": {
-    "enable": true,
-    "enable_https": true,
+    "enable": false,
+    "enable_https": false,
     "url_pattern": "/",
     "gop_num": 0,
     "single_gop_max_frame_num": 0
@@ -52,7 +52,7 @@
   "rtsp": {
     "enable": true,
     "addr": ":5544",
-    "rtsps_enable": true,
+    "rtsps_enable": false,
     "rtsps_addr": ":5322",
     "rtsps_cert_file": "./conf/cert.pem",
     "rtsps_key_file": "./conf/key.pem",
@@ -61,7 +61,7 @@
     "auth_method": 1,
     "username": "q191201771",
     "password": "pengrl",
-    "ws_rtsp_enable": true,
+    "ws_rtsp_enable": false,
     "ws_rtsp_addr": ":5566"
   },
   "record": {
@@ -110,7 +110,7 @@
     "hls_m3u8_enable": false
   },
   "pprof": {
-    "enable": true,
+    "enable": false,
     "addr": ":8084"
   },
   "log": {
@@ -128,5 +128,11 @@
     "log_group_interval_sec": 30,
     "log_group_max_group_num": 10,
     "log_group_max_sub_num_per_group": 10
+  },
+  "kafka": {
+    "enable": true,
+    "server_info": "192.168.10.175:9092",
+    "time_out_s": 5,
+    "topic_ts": "video_ts_msg"
   }
 }
