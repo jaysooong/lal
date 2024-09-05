@@ -8,6 +8,11 @@
 
 package base
 
+import (
+	"sort"
+	"sync"
+)
+
 // t_http_an__.go
 //
 // http-api和http-notify的共用部分
@@ -46,6 +51,8 @@ type StatGroup struct {
 	StatSubs    []StatSub `json:"subs"` // TODO(chef): [opt] 增加数量字段，因为这里不一定全部放入
 	StatPull    StatPull  `json:"pull"`
 
+	// TODO: [opt] 增加字段，最近1秒，5秒，10秒等时间段的fps 202408
+	// TODO: [opt] 考虑和bitrate等字段语义统一，详细的数据可以是detail样式的字段 202408
 	Fps []RecordPerSec `json:"in_frame_per_sec"`
 }
 
@@ -84,8 +91,9 @@ type StatPull struct {
 }
 
 type PeriodRecord struct {
+	mu      sync.Mutex
 	ringBuf []RecordPerSec
-	nRecord int
+	//nRecord int
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -110,39 +118,44 @@ func Session2StatPull(session ISession) StatPull {
 
 // GetFpsFrom
 //
-// @note result s.Fps is not ordered
+// s.Fps 是输出，p 是输入
 func (s *StatGroup) GetFpsFrom(p *PeriodRecord, nowUnixSec int64) {
-	if s.Fps == nil || cap(s.Fps) < p.nRecord {
-		s.Fps = make([]RecordPerSec, p.nRecord)
-	} else {
-		s.Fps = s.Fps[0:p.nRecord]
+	p.mu.Lock()
+	defer p.mu.Unlock()
+
+	if s.Fps == nil || len(s.Fps) < len(p.ringBuf) {
+		s.Fps = make([]RecordPerSec, len(p.ringBuf))
 	}
+
 	nRecord := 0
-	p.nRecord = 0
-	for idx, record := range p.ringBuf {
+	for _, record := range p.ringBuf {
 		if record.UnixSec == 0 {
 			continue
 		}
 		if record.UnixSec == nowUnixSec {
 			// value at nowUnixSec not completely recorded
-			p.nRecord++
 			continue
 		}
 		s.Fps[nRecord] = record
 		nRecord++
-		p.ringBuf[idx].UnixSec = 0
 	}
 	s.Fps = s.Fps[0:nRecord]
+
+	sort.Slice(s.Fps, func(i, j int) bool {
+		return s.Fps[i].UnixSec > s.Fps[j].UnixSec
+	})
 }
 
 func NewPeriodRecord(bufSize int) PeriodRecord {
 	return PeriodRecord{
 		ringBuf: make([]RecordPerSec, bufSize),
-		nRecord: 0,
 	}
 }
 
 func (p *PeriodRecord) Add(unixSec int64, v uint32) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+
 	var index int64
 	var record RecordPerSec
 	index = unixSec % int64(len(p.ringBuf))
@@ -150,18 +163,8 @@ func (p *PeriodRecord) Add(unixSec int64, v uint32) {
 	if record.UnixSec == unixSec {
 		p.ringBuf[index].V = record.V + v
 	} else {
-		if record.UnixSec == 0 {
-			p.nRecord++
-		}
 		p.ringBuf[index].UnixSec = unixSec
 		p.ringBuf[index].V = v
 	}
 	return
-}
-
-func (p *PeriodRecord) Clear() {
-	for idx := range p.ringBuf {
-		p.ringBuf[idx].UnixSec = 0
-		p.ringBuf[idx].V = 0
-	}
 }
